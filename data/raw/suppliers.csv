@@ -1,0 +1,21 @@
+supplier_id,supplier_name,country,region,supplier_type,capacity_per_day,avg_lead_time_days,lead_time_std,unit_cost,quality_score,reliability_score,on_time_delivery_rate
+S001,Global Components,China,Asia,Electronics,15476,8,1,113.82,87,82,0.82
+S002,India Components,India,Asia,Raw Materials,7286,8,5,22.17,93,76,0.76
+S003,Shenzhen Tech,China,Asia,Assembly,5488,7,2,42.57,99,75,0.75
+S004,Bavaria Logistics,Germany,Europe,Packaging,14195,11,5,68.73,94,93,0.93
+S005,Tokyo Precision,Japan,Asia,Components,9557,5,2,107.74,90,83,0.83
+S006,Taipei Micro,Taiwan,Asia,Electronics,7547,11,3,24.31,92,78,0.78
+S007,Guadalajara Assembly,Mexico,North America,Raw Materials,10881,16,5,47.03,81,98,0.98
+S008,Seoul Electro,South Korea,Asia,Assembly,12527,22,1,146.24,92,77,0.77
+S009,Penang Circuits,Malaysia,Asia,Packaging,14044,14,5,133.96,91,93,0.93
+S010,Vietnam Manufacturing,Vietnam,Asia,Components,8150,7,1,102.58,89,77,0.77
+S011,Americas Industrial,USA,North America,Electronics,19013,12,1,63.22,94,95,0.95
+S012,Nordic Freight,Sweden,Europe,Raw Materials,18666,16,2,61.83,86,96,0.96
+S013,Singapore Supply,Singapore,Asia,Assembly,9374,25,1,95.28,85,92,0.92
+S014,Milan Solares,Italy,Europe,Packaging,16946,12,2,74.72,88,95,0.95
+S015,UK TechWorks,UK,Europe,Components,16274,22,2,105.85,81,82,0.82
+S016,Ontario Dynamics,Canada,North America,Electronics,18464,6,3,66.16,82,81,0.81
+S017,Auckland Systems,New Zealand,Oceania,Raw Materials,19960,23,3,39.77,95,87,0.87
+S018,Sao Paulo Logistics,Brazil,South America,Assembly,19494,25,4,30,84,82,0.82
+S019,Istanbul Material,Turkey,Europe,Packaging,17205,22,5,46.78,98,88,0.88
+S020,Johannesburg Trade,South Africa,Africa,Components,19709,23,4,60.68,84,91,0.91

@@ -1,0 +1,21 @@
+warehouse_id,warehouse_name,city,state,region,capacity,storage_cost_per_unit
+WH001,Bangalore Central,Bangalore,Karnataka,South,680612,1.12
+WH002,Mumbai West,Mumbai,Maharashtra,West,622451,0.67
+WH003,Delhi NCR Hub,Gurugram,Haryana,North,552572,1.11
+WH004,Chennai Port,Chennai,Tamil Nadu,South,382582,0.56
+WH005,Kolkata East,Kolkata,West Bengal,East,809597,1.07
+WH006,Hyderabad Tech,Hyderabad,Telangana,South,858582,1.04
+WH007,Ahmedabad Logistics,Ahmedabad,Gujarat,West,434628,0.96
+WH008,Pune Central,Pune,Maharashtra,West,876510,0.62
+WH009,Jaipur North,Jaipur,Rajasthan,North,853306,1.11
+WH010,Kochi Gateway,Kochi,Kerala,South,743692,1.18
+WH011,Frankfurt Main,Frankfurt,Hesse,Europe,865492,1.03
+WH012,Rotterdam Depot,Rotterdam,South Holland,Europe,510922,1
+WH013,Los Angeles Gateway,Los Angeles,California,North America,718373,1.2
+WH014,Chicago Junction,Chicago,Illinois,North America,981446,0.76
+WH015,Singapore Freeport,Singapore,Central,Asia,842717,0.82
+WH016,Tokyo Central,Tokyo,Kanto,Asia,559947,0.66
+WH017,Shanghai Logistics,Shanghai,East,Asia,654508,0.51
+WH018,Dubai Trade Hub,Dubai,Dubai,Middle East,880828,0.66
+WH019,Sydney Distribution,Sydney,NSW,Oceania,530914,0.51
+WH020,Sao Paulo Hub,Sao Paulo,SP,South America,961759,0.54

@@ -1,0 +1,21 @@
+product_id,product_name,category,unit_cost,selling_price,criticality,supplier_dependency
+P001,Wireless Mouse,Accessories,152.11,304.92,Low,Medium
+P002,Keyboard,Accessories,259.44,394.94,Medium,Medium
+P003,27-inch Monitor,Displays,54.71,106.38,High,High
+P004,USB-C Hub,Accessories,182.15,311.08,Low,Low
+P005,Mechanical Switch Pack,Components,182,322.95,Medium,High
+P006,Lithium Battery Pack,Components,81.41,150,Critical,High
+P007,HD Webcam,Peripherals,283.19,550.59,Medium,Medium
+P008,Noise-Canceling Headset,Peripherals,41.45,87.37,High,High
+P009,SSD 1TB,Storage,227.26,457.9,Critical,High
+P010,RAM Module 16GB,Memory,107.33,175.46,High,High
+P011,Power Adapter 65W,Accessories,54.18,75.99,Medium,Low
+P012,Graphics Card RTX,Components,218.85,432.39,Critical,High
+P013,Microcontroller Unit,Semiconductors,291.79,586.37,Critical,High
+P014,Bluetooth Adapter,Accessories,156.24,232.04,Low,Low
+P015,Thermal Paste,Consumables,190.59,395.16,Low,Low
+P016,Aluminum Case,Enclosures,156.24,243.6,Medium,Medium
+P017,Docking Station,Peripherals,117.18,179.2,High,Medium
+P018,Fiber Optic Cable,Networking,286.42,612.35,Medium,Low
+P019,Wi-Fi 6 Router,Networking,276.2,519.02,High,High
+P020,Smart Sensor Node,IoT,150.67,224.42,Medium,High

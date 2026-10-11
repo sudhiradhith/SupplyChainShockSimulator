@@ -29,7 +29,24 @@ def calculate_delay_risk(shipments_df: pd.DataFrame) -> pd.DataFrame:
     Delay Risk: based on average shipment delay per supplier.
     Higher average delay = higher risk.
     """
-    avg_delay = shipments_df.groupby("supplier_id")["calculated_delay_days"].mean().reset_index()
+    delay_col = "calculated_delay_days" if "calculated_delay_days" in shipments_df.columns else "delay_days"
+    if delay_col not in shipments_df.columns:
+        if "actual_delivery" in shipments_df.columns and "expected_delivery" in shipments_df.columns:
+            shipments_df = shipments_df.copy()
+            shipments_df["calculated_delay_days"] = (
+                pd.to_datetime(shipments_df["actual_delivery"]) - pd.to_datetime(shipments_df["expected_delivery"])
+            ).dt.days.clip(lower=0)
+            delay_col = "calculated_delay_days"
+        elif "actual_delivery_date" in shipments_df.columns and "estimated_delivery_date" in shipments_df.columns:
+            shipments_df = shipments_df.copy()
+            shipments_df["calculated_delay_days"] = (
+                pd.to_datetime(shipments_df["actual_delivery_date"]) - pd.to_datetime(shipments_df["estimated_delivery_date"])
+            ).dt.days.clip(lower=0)
+            delay_col = "calculated_delay_days"
+        else:
+            return pd.DataFrame({"supplier_id": shipments_df["supplier_id"].unique(), "avg_delay_days": 0.0, "delay_risk": 0.0})
+
+    avg_delay = shipments_df.groupby("supplier_id")[delay_col].mean().reset_index()
     avg_delay.columns = ["supplier_id", "avg_delay_days"]
     avg_delay["delay_risk"] = normalize_0_100(avg_delay["avg_delay_days"], higher_is_riskier=True)
     return avg_delay
@@ -75,26 +92,22 @@ def calculate_quality_risk(suppliers_df: pd.DataFrame) -> pd.DataFrame:
 
 def calculate_dependency_risk(supplier_product_df: pd.DataFrame, products_df: pd.DataFrame) -> pd.DataFrame:
     """
-    Dependency Risk: how much of a supplier's product portfolio is
-    "High" criticality AND single-sourced (this supplier is the only one).
-    Suppliers carrying many sole-sourced critical products are riskier
-    to the business if they fail.
+    Dependency Risk: measures the supplier's exposure based on product criticality
+    and sourcing concentration (fewer suppliers per critical SKU = higher dependency risk).
     """
-    # count of suppliers per product, to detect single-sourced products
     supplier_counts = supplier_product_df.groupby("product_id")["supplier_id"].nunique().reset_index()
     supplier_counts.columns = ["product_id", "supplier_count"]
 
     merged = supplier_product_df.merge(supplier_counts, on="product_id")
     merged = merged.merge(products_df[["product_id", "criticality"]], on="product_id")
 
-    merged["is_sole_sourced_critical"] = (
-        (merged["supplier_count"] == 1) & (merged["criticality"] == "High")
-    ).astype(int)
+    crit_map = {"critical": 3.0, "high": 2.0, "medium": 1.0, "low": 0.5}
+    merged["crit_weight"] = merged["criticality"].astype(str).str.lower().map(lambda c: crit_map.get(c, 1.0))
+    merged["dependency_points"] = merged["crit_weight"] / merged["supplier_count"].clip(lower=1)
 
-    dependency = merged.groupby("supplier_id")["is_sole_sourced_critical"].sum().reset_index()
-    dependency.columns = ["supplier_id", "sole_sourced_critical_count"]
-    dependency["dependency_risk"] = normalize_0_100(dependency["sole_sourced_critical_count"], higher_is_riskier=True)
-    return dependency
+    dependency = merged.groupby("supplier_id")["dependency_points"].sum().reset_index()
+    dependency["dependency_risk"] = normalize_0_100(dependency["dependency_points"], higher_is_riskier=True)
+    return dependency[["supplier_id", "dependency_risk"]]
 
 
 def calculate_supplier_risk(
@@ -135,7 +148,7 @@ def calculate_supplier_risk(
 
     risk_df["risk_band"] = pd.cut(
         risk_df["supplier_risk_score"],
-        bins=[-0.01, 30, 60, 80, 100],
+        bins=[-0.01, 45, 65, 80, 100],
         labels=["LOW", "MEDIUM", "HIGH", "CRITICAL"]
     )
 

@@ -4,44 +4,42 @@ Simulates the impact of a sudden demand increase.
 """
 
 import pandas as pd
+import numpy as np
 
 
 def simulate_demand_shock(
     demand_increase_pct: float,
-    inventory_df: pd.DataFrame,
-    demand_df: pd.DataFrame,
-    products_df: pd.DataFrame,
+    inventory_df: pd.DataFrame = None,
+    demand_df: pd.DataFrame = None,
+    products_df: pd.DataFrame = None,
     product_id: str = None,
-    as_of_date: str = None
+    as_of_date: str = None,
+    context: dict = None
 ) -> dict:
     """
     demand_increase_pct: e.g. 0.40 for a 40% increase.
     If product_id is None, applies to all products.
     """
-    if as_of_date is None:
-        as_of_date = inventory_df["date_id"].max()
-    as_of_date = pd.to_datetime(as_of_date)
+    if context is None:
+        if inventory_df is None or demand_df is None or products_df is None:
+            raise ValueError("Must provide either context or inventory_df, demand_df, products_df")
+        from simulation.supplier_shock import build_simulation_context
+        # Use a dummy supplier_product_df if not provided
+        supp_prod_dummy = pd.DataFrame(columns=["supplier_id", "product_id"])
+        context = build_simulation_context(inventory_df, demand_df, supp_prod_dummy, products_df, as_of_date)
 
-    target_products = [product_id] if product_id else demand_df["product_id"].unique()
+    product_state = context["product_state"]
+    target_products = [product_id] if product_id else list(product_state.keys())
     results = []
 
     for pid in target_products:
-        product_inv = inventory_df[
-            (inventory_df["product_id"] == pid) &
-            (pd.to_datetime(inventory_df["date_id"]) <= as_of_date)
-        ].sort_values("date_id")
-
-        if product_inv.empty:
+        p_state = product_state.get(pid)
+        if not p_state or p_state["avg_daily_demand"] <= 0:
             continue
 
-        current_inventory = product_inv["closing_inventory"].iloc[-1]
-
-        product_demand = demand_df[demand_df["product_id"] == pid]
-        normal_demand = product_demand["demand_quantity"].mean()
-        avg_price = product_demand["price"].mean()
-
-        if normal_demand <= 0 or pd.isna(normal_demand):
-            continue
+        current_inventory = p_state["current_inventory"]
+        normal_demand = p_state["avg_daily_demand"]
+        avg_price = p_state["avg_price"]
 
         shocked_demand = normal_demand * (1 + demand_increase_pct)
         days_to_stockout_normal = current_inventory / normal_demand
@@ -51,12 +49,9 @@ def simulate_demand_shock(
         extra_units_needed = (shocked_demand - normal_demand) * days_to_stockout_shocked
         revenue_at_risk = extra_units_needed * avg_price
 
-        product_name = products_df.loc[products_df["product_id"] == pid, "product_name"]
-        product_name = product_name.values[0] if len(product_name) > 0 else pid
-
         results.append({
             "product_id": pid,
-            "product_name": product_name,
+            "product_name": p_state["product_name"],
             "normal_demand": round(normal_demand, 2),
             "shocked_demand": round(shocked_demand, 2),
             "days_to_stockout_normal": round(days_to_stockout_normal, 1),
@@ -70,6 +65,6 @@ def simulate_demand_shock(
     return {
         "demand_increase_pct": demand_increase_pct,
         "affected_products": len(results_df),
-        "total_revenue_at_risk": round(results_df["revenue_at_risk"].sum(), 2) if not results_df.empty else 0,
+        "total_revenue_at_risk": round(float(results_df["revenue_at_risk"].sum()), 2) if not results_df.empty else 0.0,
         "detail": results_df
     }

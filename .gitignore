@@ -1,4 +1,4 @@
-﻿# Python
+# Python
 __pycache__/
 *.py[cod]
 *.pyo
@@ -30,13 +30,10 @@ ENV/
 .ipynb_checkpoints/
 *.ipynb
 
-# Data files (large)
-data/raw/*
-data/processed/*
+# Data files (large raw dumps over 50MB, keep parquet and essential csv)
 data/external/*
-!data/raw/.gitkeep
-!data/processed/.gitkeep
 !data/external/.gitkeep
+data/raw/orders.csv
 
 # IDE
 .vscode/

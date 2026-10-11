@@ -16,3 +16,5 @@ ortools
 fastapi
 uvicorn
 pytest
+pyarrow
+pydantic
