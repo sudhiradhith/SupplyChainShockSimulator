@@ -44,6 +44,11 @@ def get_database_url() -> Optional[str]:
         if url.startswith("postgres://"):
             url = url.replace("postgres://", "postgresql://", 1)
 
+        # For remote cloud databases (Render, Neon, Supabase), ensure sslmode is specified
+        if "render.com" in url and "sslmode" not in url:
+            separator = "&" if "?" in url else "?"
+            url = f"{url}{separator}sslmode=require"
+
     return url
 
 
