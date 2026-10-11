@@ -24,21 +24,44 @@ def load_all_data():
     raw_dir = PROJECT_ROOT / "data" / "raw"
     proc_dir = PROJECT_ROOT / "data" / "processed"
 
-    # Raw / Dim tables
-    suppliers_df = pd.read_csv(raw_dir / "suppliers.csv")
-    products_df = pd.read_csv(raw_dir / "products.csv")
-    warehouses_df = pd.read_csv(raw_dir / "warehouses.csv")
-    supplier_product_df = pd.read_csv(raw_dir / "supplier_products.csv")
+    # Attempt loading from Online Cloud Database if configured
+    use_online_db = False
+    try:
+        from db.database import is_db_available, load_table
+        if is_db_available():
+            suppliers_df = load_table("dim_supplier")
+            products_df = load_table("dim_product")
+            warehouses_df = load_table("dim_warehouse")
+            supplier_product_df = load_table("fact_supplier_product")
+            demand_df = load_table("fact_demand")
+            inventory_df = load_table("fact_inventory")
+            shipments_df = load_table("fact_shipments")
+            inventory_summary_df = load_table("inventory_summary")
+            supplier_risk_df = load_table("supplier_risk")
+            forecast_comp_df = load_table("forecast_comparison")
+            best_forecast_df = load_table("best_forecast_model_per_product")
+            monte_carlo_df = load_table("monte_carlo_summary")
 
-    # Processed Parquet tables
-    demand_df = pd.read_parquet(proc_dir / "demand_enriched.parquet")
-    inventory_df = pd.read_parquet(proc_dir / "inventory_enriched.parquet")
-    shipments_df = pd.read_parquet(proc_dir / "shipments_enriched.parquet")
-    inventory_summary_df = pd.read_parquet(proc_dir / "inventory_summary.parquet")
-    supplier_risk_df = pd.read_parquet(proc_dir / "supplier_risk.parquet")
-    forecast_comp_df = pd.read_parquet(proc_dir / "forecast_comparison.parquet")
-    best_forecast_df = pd.read_parquet(proc_dir / "best_forecast_model_per_product.parquet")
-    monte_carlo_df = pd.read_parquet(proc_dir / "monte_carlo_summary.parquet")
+            if all(df is not None for df in [suppliers_df, products_df, supplier_risk_df, inventory_summary_df, monte_carlo_df]):
+                use_online_db = True
+    except Exception:
+        use_online_db = False
+
+    # Fallback to local Parquet / CSV files if online DB not configured
+    if not use_online_db:
+        suppliers_df = pd.read_csv(raw_dir / "suppliers.csv")
+        products_df = pd.read_csv(raw_dir / "products.csv")
+        warehouses_df = pd.read_csv(raw_dir / "warehouses.csv")
+        supplier_product_df = pd.read_csv(raw_dir / "supplier_products.csv")
+
+        demand_df = pd.read_parquet(proc_dir / "demand_enriched.parquet")
+        inventory_df = pd.read_parquet(proc_dir / "inventory_enriched.parquet")
+        shipments_df = pd.read_parquet(proc_dir / "shipments_enriched.parquet")
+        inventory_summary_df = pd.read_parquet(proc_dir / "inventory_summary.parquet")
+        supplier_risk_df = pd.read_parquet(proc_dir / "supplier_risk.parquet")
+        forecast_comp_df = pd.read_parquet(proc_dir / "forecast_comparison.parquet")
+        best_forecast_df = pd.read_parquet(proc_dir / "best_forecast_model_per_product.parquet")
+        monte_carlo_df = pd.read_parquet(proc_dir / "monte_carlo_summary.parquet")
 
     # Ensure standardized column aliases for inventory_summary
     if "turnover_ratio" in inventory_summary_df.columns:
@@ -72,6 +95,7 @@ def load_all_data():
         "best_forecast": best_forecast_df,
         "monte_carlo_summary": monte_carlo_df,
         "sim_context": sim_context,
+        "is_online_db": use_online_db,
         # Suffix aliases for complete compatibility
         "suppliers_df": suppliers_df,
         "products_df": products_df,
