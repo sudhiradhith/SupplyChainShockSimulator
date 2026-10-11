@@ -42,8 +42,15 @@ def load_all_data():
             best_forecast_df = load_table("best_forecast_model_per_product")
             monte_carlo_df = load_table("monte_carlo_summary")
 
-            if all(df is not None for df in [suppliers_df, products_df, supplier_risk_df, inventory_summary_df, monte_carlo_df]):
+            all_tables = [
+                suppliers_df, products_df, warehouses_df, supplier_product_df,
+                demand_df, inventory_df, shipments_df, inventory_summary_df,
+                supplier_risk_df, forecast_comp_df, best_forecast_df, monte_carlo_df
+            ]
+            if all(df is not None and not df.empty for df in all_tables):
                 use_online_db = True
+            else:
+                use_online_db = False
     except Exception:
         use_online_db = False
 
