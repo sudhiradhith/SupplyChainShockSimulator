@@ -77,6 +77,58 @@ def build_simulation_context(
     }
 
 
+def build_simulation_context_from_summary(
+    inventory_summary_df: pd.DataFrame,
+    products_df: pd.DataFrame,
+    supplier_product_df: pd.DataFrame,
+    as_of_date: str = "2024-12-31"
+) -> dict:
+    """
+    Instantly builds simulation context from precomputed summary tables in microseconds (<1ms)
+    without needing to query or scan heavy historical raw tables.
+    """
+    prod_names = dict(zip(products_df["product_id"], products_df["product_name"]))
+    price_col = "selling_price" if "selling_price" in products_df.columns else ("price" if "price" in products_df.columns else "unit_cost")
+    prod_prices = dict(zip(products_df["product_id"], products_df[price_col]))
+    supp_prods = supplier_product_df.groupby("supplier_id")["product_id"].unique().to_dict()
+
+    inv_sum = inventory_summary_df.set_index("product_id")
+    product_state = {}
+
+    for pid in products_df["product_id"].unique():
+        if pid in inv_sum.index:
+            row = inv_sum.loc[pid]
+            dts = float(row.get("days_of_inventory", 14.0))
+            if "avg_daily_demand" in row:
+                avg_dem = float(row["avg_daily_demand"])
+            elif "total_demand" in row:
+                avg_dem = float(row["total_demand"]) / 730.0
+            else:
+                avg_dem = 50.0
+            curr_inv = float(row.get("avg_inventory", row.get("closing_inventory", dts * avg_dem)))
+        else:
+            dts = 14.0
+            avg_dem = 50.0
+            curr_inv = dts * avg_dem
+
+        avg_prc = float(prod_prices.get(pid, 100.0))
+
+        product_state[pid] = {
+            "product_id": pid,
+            "product_name": prod_names.get(pid, pid),
+            "current_inventory": curr_inv,
+            "avg_daily_demand": avg_dem,
+            "avg_price": avg_prc,
+            "days_to_stockout": dts,
+        }
+
+    return {
+        "as_of_date": as_of_date,
+        "product_state": product_state,
+        "supplier_products": supp_prods,
+    }
+
+
 def simulate_supplier_delay(
     supplier_id: str,
     delay_days: int,

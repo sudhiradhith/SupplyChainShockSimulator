@@ -108,11 +108,20 @@ def recommend_strategy(
     detail = shock_result.get("detail", pd.DataFrame())
     if isinstance(detail, pd.DataFrame) and not detail.empty and "product_id" in detail.columns:
         affected_ids = detail["product_id"].unique()
-        latest_date = inventory_df["date_id"].max()
-        network_stock = float(inventory_df[
-            (inventory_df["product_id"].isin(affected_ids)) &
-            (inventory_df["date_id"] == latest_date)
-        ]["closing_inventory"].sum())
+        if inventory_df is not None and not inventory_df.empty and "date_id" in inventory_df.columns:
+            latest_date = inventory_df["date_id"].max()
+            matching = inventory_df[
+                (inventory_df["product_id"].isin(affected_ids)) &
+                (inventory_df["date_id"] == latest_date)
+            ]
+            col = "closing_inventory" if "closing_inventory" in matching.columns else "avg_inventory"
+            network_stock = float(matching[col].sum()) if (not matching.empty and col in matching.columns) else 0.0
+        elif inventory_df is not None and not inventory_df.empty and "product_id" in inventory_df.columns:
+            matching = inventory_df[inventory_df["product_id"].isin(affected_ids)]
+            col = "closing_inventory" if "closing_inventory" in matching.columns else "avg_inventory"
+            network_stock = float(matching[col].sum()) if (not matching.empty and col in matching.columns) else 0.0
+        else:
+            network_stock = 0.0
     else:
         network_stock = 0.0
 

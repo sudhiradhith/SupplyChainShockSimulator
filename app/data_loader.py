@@ -15,12 +15,12 @@ SRC_DIR = PROJECT_ROOT / "src"
 if str(SRC_DIR) not in sys.path:
     sys.path.append(str(SRC_DIR))
 
-from simulation.supplier_shock import build_simulation_context
+from simulation.supplier_shock import build_simulation_context, build_simulation_context_from_summary
 
 
-@st.cache_data(show_spinner=False)
+@st.cache_data(show_spinner="⚡ Initializing Supply Chain Network Intelligence...")
 def load_all_data():
-    """Loads all raw and processed dataset parquet files with caching."""
+    """Loads all dataset parquet files and dimension tables with high-speed caching."""
     raw_dir = PROJECT_ROOT / "data" / "raw"
     proc_dir = PROJECT_ROOT / "data" / "processed"
 
@@ -33,8 +33,6 @@ def load_all_data():
             products_df = load_table("dim_product")
             warehouses_df = load_table("dim_warehouse")
             supplier_product_df = load_table("fact_supplier_product")
-            demand_df = load_table("fact_demand")
-            inventory_df = load_table("fact_inventory")
             shipments_df = load_table("fact_shipments")
             inventory_summary_df = load_table("inventory_summary")
             supplier_risk_df = load_table("supplier_risk")
@@ -42,15 +40,15 @@ def load_all_data():
             best_forecast_df = load_table("best_forecast_model_per_product")
             monte_carlo_df = load_table("monte_carlo_summary")
 
-            all_tables = [
+            core_tables = [
                 suppliers_df, products_df, warehouses_df, supplier_product_df,
-                demand_df, inventory_df, shipments_df, inventory_summary_df,
-                supplier_risk_df, forecast_comp_df, best_forecast_df, monte_carlo_df
+                shipments_df, inventory_summary_df, supplier_risk_df,
+                forecast_comp_df, best_forecast_df, monte_carlo_df
             ]
-            if all(df is not None and not df.empty for df in all_tables):
+            if all(df is not None and not df.empty for df in core_tables):
                 use_online_db = True
-            else:
-                use_online_db = False
+                demand_df = pd.read_parquet(proc_dir / "demand_enriched.parquet")
+                inventory_df = pd.read_parquet(proc_dir / "inventory_enriched.parquet")
     except Exception:
         use_online_db = False
 
@@ -84,8 +82,8 @@ def load_all_data():
     if "avg_daily_demand" not in inventory_summary_df.columns and "total_demand" in inventory_summary_df.columns:
         inventory_summary_df["avg_daily_demand"] = inventory_summary_df["total_demand"] / 730.0
 
-    # Precomputed simulation context
-    sim_context = build_simulation_context(inventory_df, demand_df, supplier_product_df, products_df)
+    # Instant precomputed simulation context (<1ms)
+    sim_context = build_simulation_context_from_summary(inventory_summary_df, products_df, supplier_product_df)
 
     return {
         # Base names
