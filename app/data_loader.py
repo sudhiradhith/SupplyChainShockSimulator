@@ -24,49 +24,33 @@ def load_all_data():
     raw_dir = PROJECT_ROOT / "data" / "raw"
     proc_dir = PROJECT_ROOT / "data" / "processed"
 
-    # Attempt loading from Online Cloud Database if configured
+    # Load fast pre-packaged local datasets directly (<1.2s total)
+    suppliers_df = pd.read_csv(raw_dir / "suppliers.csv")
+    products_df = pd.read_csv(raw_dir / "products.csv")
+    warehouses_df = pd.read_csv(raw_dir / "warehouses.csv")
+    supplier_product_df = pd.read_csv(raw_dir / "supplier_products.csv")
+
+    inventory_summary_df = pd.read_parquet(proc_dir / "inventory_summary.parquet")
+    supplier_risk_df = pd.read_parquet(proc_dir / "supplier_risk.parquet")
+    forecast_comp_df = pd.read_parquet(proc_dir / "forecast_comparison.parquet")
+    best_forecast_df = pd.read_parquet(proc_dir / "best_forecast_model_per_product.parquet")
+    monte_carlo_df = pd.read_parquet(proc_dir / "monte_carlo_summary.parquet")
+    shipments_df = pd.read_parquet(proc_dir / "shipments_enriched.parquet")
+    demand_df = pd.read_parquet(proc_dir / "demand_enriched.parquet")
+    inventory_df = pd.read_parquet(proc_dir / "inventory_enriched.parquet")
+
+    # Optional: override with online database only if explicitly enabled
     use_online_db = False
-    try:
-        from db.database import is_db_available, load_table
-        if is_db_available():
-            suppliers_df = load_table("dim_supplier")
-            products_df = load_table("dim_product")
-            warehouses_df = load_table("dim_warehouse")
-            supplier_product_df = load_table("fact_supplier_product")
-            shipments_df = load_table("fact_shipments")
-            inventory_summary_df = load_table("inventory_summary")
-            supplier_risk_df = load_table("supplier_risk")
-            forecast_comp_df = load_table("forecast_comparison")
-            best_forecast_df = load_table("best_forecast_model_per_product")
-            monte_carlo_df = load_table("monte_carlo_summary")
-
-            core_tables = [
-                suppliers_df, products_df, warehouses_df, supplier_product_df,
-                shipments_df, inventory_summary_df, supplier_risk_df,
-                forecast_comp_df, best_forecast_df, monte_carlo_df
-            ]
-            if all(df is not None and not df.empty for df in core_tables):
-                use_online_db = True
-                demand_df = pd.read_parquet(proc_dir / "demand_enriched.parquet")
-                inventory_df = pd.read_parquet(proc_dir / "inventory_enriched.parquet")
-    except Exception:
-        use_online_db = False
-
-    # Fallback to local Parquet / CSV files if online DB not configured
-    if not use_online_db:
-        suppliers_df = pd.read_csv(raw_dir / "suppliers.csv")
-        products_df = pd.read_csv(raw_dir / "products.csv")
-        warehouses_df = pd.read_csv(raw_dir / "warehouses.csv")
-        supplier_product_df = pd.read_csv(raw_dir / "supplier_products.csv")
-
-        demand_df = pd.read_parquet(proc_dir / "demand_enriched.parquet")
-        inventory_df = pd.read_parquet(proc_dir / "inventory_enriched.parquet")
-        shipments_df = pd.read_parquet(proc_dir / "shipments_enriched.parquet")
-        inventory_summary_df = pd.read_parquet(proc_dir / "inventory_summary.parquet")
-        supplier_risk_df = pd.read_parquet(proc_dir / "supplier_risk.parquet")
-        forecast_comp_df = pd.read_parquet(proc_dir / "forecast_comparison.parquet")
-        best_forecast_df = pd.read_parquet(proc_dir / "best_forecast_model_per_product.parquet")
-        monte_carlo_df = pd.read_parquet(proc_dir / "monte_carlo_summary.parquet")
+    if os.getenv("ENABLE_CLOUD_DB", "").lower() in ("true", "1", "yes"):
+        try:
+            from db.database import is_db_available, load_table
+            if is_db_available():
+                cloud_risk = load_table("supplier_risk")
+                if cloud_risk is not None and not cloud_risk.empty:
+                    supplier_risk_df = cloud_risk
+                    use_online_db = True
+        except Exception:
+            use_online_db = False
 
     # Ensure standardized column aliases for inventory_summary
     if "turnover_ratio" in inventory_summary_df.columns:

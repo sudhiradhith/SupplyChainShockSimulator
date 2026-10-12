@@ -35,8 +35,7 @@ st.set_page_config(
 inject_custom_css()
 
 # Load cached data
-with st.spinner("Loading supply chain network data..."):
-    data = load_all_data()
+data = load_all_data()
 
 suppliers_df = data["suppliers"]
 products_df = data["products"]
