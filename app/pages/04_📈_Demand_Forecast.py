@@ -59,18 +59,21 @@ selected_pid = st.selectbox(
     format_func=lambda pid: f"{pid} - {products_df.loc[products_df['product_id']==pid, 'product_name'].values[0]} ({products_df.loc[products_df['product_id']==pid, 'category'].values[0]})"
 )
 
-# Run interactive forecast generation for selected product
-daily_series = prepare_daily_series(demand_df, selected_pid)
-train_series, test_series = train_test_split_series(daily_series, test_days=30)
+@st.cache_data(show_spinner="Fitting moving average, Holt-Winters & XGBoost models...")
+def compute_product_forecast(pid: str):
+    daily_s = prepare_daily_series(demand_df, pid)
+    train_s, test_s = train_test_split_series(daily_s, test_days=30)
+    h = len(test_s)
+    ma_p = forecast_moving_average(train_s, horizon=h)
+    es_p = forecast_exponential_smoothing(train_s, horizon=h)
+    xgb_p, xgb_i = forecast_xgboost(train_s, test_s)
+    ma_e = evaluate_forecast(test_s.values, ma_p)
+    es_e = evaluate_forecast(test_s.values, es_p)
+    xgb_e = evaluate_forecast(test_s.loc[xgb_i].values, xgb_p)
+    return train_s, test_s, ma_p, es_p, xgb_p, xgb_i, ma_e, es_e, xgb_e
 
-horizon = len(test_series)
-ma_preds = forecast_moving_average(train_series, horizon=horizon)
-es_preds = forecast_exponential_smoothing(train_series, horizon=horizon)
-xgb_preds, xgb_idx = forecast_xgboost(train_series, test_series)
-
-ma_eval = evaluate_forecast(test_series.values, ma_preds)
-es_eval = evaluate_forecast(test_series.values, es_preds)
-xgb_eval = evaluate_forecast(test_series.loc[xgb_idx].values, xgb_preds)
+# Run cached interactive forecast generation for selected product
+train_series, test_series, ma_preds, es_preds, xgb_preds, xgb_idx, ma_eval, es_eval, xgb_eval = compute_product_forecast(selected_pid)
 
 # Best model for this product from processed comparison
 best_model_name = "XGBoost"

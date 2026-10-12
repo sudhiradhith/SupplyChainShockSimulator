@@ -228,9 +228,11 @@ if run_mc and selected_supplier:
     st.subheader(f"🎲 Monte Carlo Probabilistic Disruption Profile: {selected_supplier}")
     st.caption("5,000 stochastic iterations sampling real-world lead time delay distributions.")
 
-    mc_res = run_monte_carlo_supplier_delay(
-        selected_supplier, n_iterations=5000, context=sim_context
-    )
+    @st.cache_data(show_spinner="Running 5,000 Monte Carlo stochastic iterations...")
+    def get_cached_monte_carlo(sid: str):
+        return run_monte_carlo_supplier_delay(sid, n_iterations=5000, context=sim_context)
+
+    mc_res = get_cached_monte_carlo(selected_supplier)
 
     m1, m2, m3, m4 = st.columns(4)
     with m1:

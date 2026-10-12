@@ -35,7 +35,7 @@ inject_custom_css()
 data = load_all_data()
 suppliers_df = data["suppliers"]
 products_df = data["products"]
-inventory_df = data["inventory"]
+inventory_df = data["inventory_summary"]
 sim_context = data["sim_context"]
 
 st.title("💡 Strategic Mitigation & Decision Matrix")
