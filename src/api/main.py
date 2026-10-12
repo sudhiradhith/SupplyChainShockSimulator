@@ -16,23 +16,42 @@ SRC_DIR = PROJECT_ROOT / "src"
 if str(SRC_DIR) not in sys.path:
     sys.path.append(str(SRC_DIR))
 
-from api.schemas import (
-    SupplierDelayRequest,
-    DemandShockRequest,
-    CapacityShockRequest,
-    TransportShockRequest,
-    CombinedShockRequest,
-    MonteCarloRequest,
-    StrategyOptimizationRequest,
-    GenericResponse
-)
-from simulation.supplier_shock import simulate_supplier_delay, build_simulation_context
-from simulation.demand_shock import simulate_demand_shock
-from simulation.capacity_shock import simulate_capacity_shock
-from simulation.transport_shock import simulate_transport_shock
-from simulation.combined_shock import simulate_combined_shock
-from simulation.monte_carlo import run_monte_carlo_supplier_delay
-from optimization.strategies import recommend_strategy
+try:
+    from src.api.schemas import (
+        SupplierDelayRequest,
+        DemandShockRequest,
+        CapacityShockRequest,
+        TransportShockRequest,
+        CombinedShockRequest,
+        MonteCarloRequest,
+        StrategyOptimizationRequest,
+        GenericResponse
+    )
+    from src.simulation.supplier_shock import simulate_supplier_delay, build_simulation_context
+    from src.simulation.demand_shock import simulate_demand_shock
+    from src.simulation.capacity_shock import simulate_capacity_shock
+    from src.simulation.transport_shock import simulate_transport_shock
+    from src.simulation.combined_shock import simulate_combined_shock
+    from src.simulation.monte_carlo import run_monte_carlo_supplier_delay
+    from src.optimization.strategies import recommend_strategy
+except ImportError:
+    from api.schemas import (
+        SupplierDelayRequest,
+        DemandShockRequest,
+        CapacityShockRequest,
+        TransportShockRequest,
+        CombinedShockRequest,
+        MonteCarloRequest,
+        StrategyOptimizationRequest,
+        GenericResponse
+    )
+    from simulation.supplier_shock import simulate_supplier_delay, build_simulation_context
+    from simulation.demand_shock import simulate_demand_shock
+    from simulation.capacity_shock import simulate_capacity_shock
+    from simulation.transport_shock import simulate_transport_shock
+    from simulation.combined_shock import simulate_combined_shock
+    from simulation.monte_carlo import run_monte_carlo_supplier_delay
+    from optimization.strategies import recommend_strategy
 
 app = FastAPI(
     title="Supply Chain Resilience & Shock Intelligence API",
