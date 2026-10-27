@@ -32,7 +32,6 @@ inject_custom_css()
 data = load_all_data()
 products_df = data["products"]
 inv_summary_df = data["inventory_summary"]
-inv_df = data["inventory"]
 warehouses_df = data["warehouses"]
 
 st.title("📦 Inventory Intelligence & Stockout Exposure")

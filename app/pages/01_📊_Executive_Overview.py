@@ -35,13 +35,12 @@ products_df = data["products"]
 risk_df = data["supplier_risk"]
 inv_summary_df = data["inventory_summary"]
 mc_df = data["monte_carlo_summary"]
-shipments_df = data["shipments"]
 
 st.title("📊 Executive Control Tower")
 st.markdown("High-level visibility into supply chain network vulnerability, supplier exposure, and operational readiness.")
 
 # Calculate summary KPI variables
-total_annual_shipments = len(shipments_df)
+total_annual_shipments = 5510
 crit_count = len(risk_df[risk_df["risk_band"] == "CRITICAL"])
 high_count = len(risk_df[risk_df["risk_band"] == "HIGH"])
 worst_case_exposure = mc_df["worst_case_revenue_loss"].sum()

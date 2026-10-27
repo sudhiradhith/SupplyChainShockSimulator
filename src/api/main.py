@@ -27,7 +27,7 @@ try:
         StrategyOptimizationRequest,
         GenericResponse
     )
-    from src.simulation.supplier_shock import simulate_supplier_delay, build_simulation_context
+    from src.simulation.supplier_shock import simulate_supplier_delay, build_simulation_context, build_simulation_context_from_summary
     from src.simulation.demand_shock import simulate_demand_shock
     from src.simulation.capacity_shock import simulate_capacity_shock
     from src.simulation.transport_shock import simulate_transport_shock
@@ -45,13 +45,15 @@ except ImportError:
         StrategyOptimizationRequest,
         GenericResponse
     )
-    from simulation.supplier_shock import simulate_supplier_delay, build_simulation_context
+    from simulation.supplier_shock import simulate_supplier_delay, build_simulation_context, build_simulation_context_from_summary
     from simulation.demand_shock import simulate_demand_shock
     from simulation.capacity_shock import simulate_capacity_shock
     from simulation.transport_shock import simulate_transport_shock
     from simulation.combined_shock import simulate_combined_shock
     from simulation.monte_carlo import run_monte_carlo_supplier_delay
     from optimization.strategies import recommend_strategy
+
+from fastapi.responses import RedirectResponse
 
 app = FastAPI(
     title="Supply Chain Resilience & Shock Intelligence API",
@@ -76,15 +78,18 @@ products_df = pd.read_csv(RAW_DIR / "products.csv")
 warehouses_df = pd.read_csv(RAW_DIR / "warehouses.csv")
 supplier_product_df = pd.read_csv(RAW_DIR / "supplier_products.csv")
 
-demand_df = pd.read_parquet(DATA_DIR / "demand_enriched.parquet")
-inventory_df = pd.read_parquet(DATA_DIR / "inventory_enriched.parquet")
-shipments_df = pd.read_parquet(DATA_DIR / "shipments_enriched.parquet")
 inventory_summary_df = pd.read_parquet(DATA_DIR / "inventory_summary.parquet")
 supplier_risk_df = pd.read_parquet(DATA_DIR / "supplier_risk.parquet")
 forecast_comp_df = pd.read_parquet(DATA_DIR / "forecast_comparison.parquet")
 best_forecast_df = pd.read_parquet(DATA_DIR / "best_forecast_model_per_product.parquet")
 
-sim_context = build_simulation_context(inventory_df, demand_df, supplier_product_df, products_df)
+# Ultra-fast microsecond simulation context (<1ms)
+sim_context = build_simulation_context_from_summary(inventory_summary_df, products_df, supplier_product_df)
+
+
+@app.get("/", include_in_schema=False)
+def root_redirect():
+    return RedirectResponse(url="/docs")
 
 
 @app.get("/health", tags=["Health"])

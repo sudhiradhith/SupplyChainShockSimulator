@@ -42,9 +42,6 @@ suppliers_df = data["suppliers"]
 products_df = data["products"]
 warehouses_df = data["warehouses"]
 supp_prod_df = data["supplier_products"]
-demand_df = data["demand"]
-inventory_df = data["inventory"]
-shipments_df = data["shipments"]
 sim_context = data["sim_context"]
 
 st.title("⚡ Operational Shock & Disruption Simulator")

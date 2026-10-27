@@ -36,8 +36,6 @@ data = load_all_data()
 suppliers_df = data["suppliers"]
 products_df = data["products"]
 supp_prod_df = data["supplier_products"]
-demand_df = data["demand"]
-inventory_df = data["inventory"]
 sim_context = data["sim_context"]
 
 st.title("🔄 Multi-Scenario Disruption Sensitivity Analysis")

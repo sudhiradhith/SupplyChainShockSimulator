@@ -4,7 +4,7 @@ FROM python:3.12-slim AS base
 ENV PYTHONUNBUFFERED=1 \
     PYTHONDONTWRITEBYTECODE=1 \
     PIP_NO_CACHE_DIR=1 \
-    PORT=8501
+    PORT=10000
 
 WORKDIR /app
 
@@ -23,8 +23,8 @@ RUN pip install --upgrade pip && \
 # Copy application source code
 COPY . .
 
-# Expose Streamlit (8501) and FastAPI (8000)
-EXPOSE 8501 8000
+# Expose Render standard port (10000) and local dev port (8501)
+EXPOSE 10000 8501
 
-# Default command launches Streamlit Dashboard (respects Render's dynamic $PORT)
-CMD ["sh", "-c", "streamlit run app/main.py --server.port=${PORT:-8501} --server.address=0.0.0.0"]
+# Default command launches Streamlit Dashboard
+CMD ["sh", "-c", "streamlit run app/main.py --server.port=${PORT:-10000} --server.address=0.0.0.0"]

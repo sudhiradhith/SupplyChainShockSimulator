@@ -34,7 +34,6 @@ suppliers_df = data["suppliers"]
 products_df = data["products"]
 risk_df = data["supplier_risk"]
 supp_prod_df = data["supplier_product_df"]
-shipments_df = data["shipments"]
 
 st.title("🏢 Supplier Risk & Intelligence Engine")
 st.markdown("Multi-dimensional risk scoring combining historical shipment delays, delivery reliability, capacity constraints, quality scores, and single-source dependencies.")
