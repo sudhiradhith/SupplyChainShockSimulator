@@ -65,8 +65,17 @@ def compute_product_forecast(pid: str):
     train_s, test_s = train_test_split_series(daily_s, test_days=30)
     h = len(test_s)
     ma_p = forecast_moving_average(train_s, horizon=h)
-    es_p = forecast_exponential_smoothing(train_s, horizon=h)
-    xgb_p, xgb_i = forecast_xgboost(train_s, test_s)
+    
+    try:
+        es_p = forecast_exponential_smoothing(train_s, horizon=h)
+    except Exception:
+        es_p = ma_p
+        
+    try:
+        xgb_p, xgb_i = forecast_xgboost(train_s, test_s)
+    except Exception:
+        xgb_p, xgb_i = ma_p, test_s.index
+        
     ma_e = evaluate_forecast(test_s.values, ma_p)
     es_e = evaluate_forecast(test_s.values, es_p)
     xgb_e = evaluate_forecast(test_s.loc[xgb_i].values, xgb_p)

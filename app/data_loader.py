@@ -62,8 +62,14 @@ class LazyDataBundle(dict):
             return val
         return super().__getitem__(key)
 
+    def get(self, key, default=None):
+        try:
+            return self[key]
+        except KeyError:
+            return default
 
-@st.cache_data(show_spinner="⚡ Initializing Supply Chain Network Intelligence...")
+
+@st.cache_resource(show_spinner="⚡ Initializing Supply Chain Network Intelligence...")
 def load_all_data():
     """Loads all dataset parquet files and dimension tables with high-speed caching."""
     raw_dir = PROJECT_ROOT / "data" / "raw"
