@@ -18,13 +18,58 @@ if str(SRC_DIR) not in sys.path:
 from simulation.supplier_shock import build_simulation_context, build_simulation_context_from_summary
 
 
+@st.cache_data(show_spinner=False)
+def load_demand_data() -> pd.DataFrame:
+    """Lazily load historical demand records on-demand."""
+    proc_dir = PROJECT_ROOT / "data" / "processed"
+    return pd.read_parquet(proc_dir / "demand_enriched.parquet")
+
+
+@st.cache_data(show_spinner=False)
+def load_inventory_data() -> pd.DataFrame:
+    """Lazily load daily inventory tracking records on-demand."""
+    proc_dir = PROJECT_ROOT / "data" / "processed"
+    return pd.read_parquet(proc_dir / "inventory_enriched.parquet")
+
+
+@st.cache_data(show_spinner=False)
+def load_shipments_data() -> pd.DataFrame:
+    """Lazily load shipment tracking records on-demand."""
+    proc_dir = PROJECT_ROOT / "data" / "processed"
+    return pd.read_parquet(proc_dir / "shipments_enriched.parquet")
+
+
+class LazyDataBundle(dict):
+    """Dictionary that lazily loads heavy tables only when accessed to protect RAM."""
+    def __getitem__(self, key):
+        if key in ("demand", "demand_df"):
+            val = super().get("demand")
+            if val is None:
+                val = load_demand_data()
+                self["demand"] = self["demand_df"] = val
+            return val
+        if key in ("inventory", "inventory_df"):
+            val = super().get("inventory")
+            if val is None:
+                val = load_inventory_data()
+                self["inventory"] = self["inventory_df"] = val
+            return val
+        if key in ("shipments", "shipments_df"):
+            val = super().get("shipments")
+            if val is None:
+                val = load_shipments_data()
+                self["shipments"] = self["shipments_df"] = val
+            return val
+        return super().__getitem__(key)
+
+
 @st.cache_data(show_spinner="⚡ Initializing Supply Chain Network Intelligence...")
 def load_all_data():
     """Loads all dataset parquet files and dimension tables with high-speed caching."""
     raw_dir = PROJECT_ROOT / "data" / "raw"
     proc_dir = PROJECT_ROOT / "data" / "processed"
 
-    # Load fast pre-packaged local datasets directly (<1.2s total)
+    # Fast dimension tables and precomputed summaries (<0.3s total, <15MB RAM)
     suppliers_df = pd.read_csv(raw_dir / "suppliers.csv")
     products_df = pd.read_csv(raw_dir / "products.csv")
     warehouses_df = pd.read_csv(raw_dir / "warehouses.csv")
@@ -35,9 +80,6 @@ def load_all_data():
     forecast_comp_df = pd.read_parquet(proc_dir / "forecast_comparison.parquet")
     best_forecast_df = pd.read_parquet(proc_dir / "best_forecast_model_per_product.parquet")
     monte_carlo_df = pd.read_parquet(proc_dir / "monte_carlo_summary.parquet")
-    shipments_df = pd.read_parquet(proc_dir / "shipments_enriched.parquet")
-    demand_df = pd.read_parquet(proc_dir / "demand_enriched.parquet")
-    inventory_df = pd.read_parquet(proc_dir / "inventory_enriched.parquet")
 
     # Optional: override with online database only if explicitly enabled
     use_online_db = False
@@ -69,15 +111,15 @@ def load_all_data():
     # Instant precomputed simulation context (<1ms)
     sim_context = build_simulation_context_from_summary(inventory_summary_df, products_df, supplier_product_df)
 
-    return {
+    return LazyDataBundle({
         # Base names
         "suppliers": suppliers_df,
         "products": products_df,
         "warehouses": warehouses_df,
         "supplier_products": supplier_product_df,
-        "demand": demand_df,
-        "inventory": inventory_df,
-        "shipments": shipments_df,
+        "demand": None,
+        "inventory": None,
+        "shipments": None,
         "inventory_summary": inventory_summary_df,
         "supplier_risk": supplier_risk_df,
         "forecast_comparison": forecast_comp_df,
@@ -90,8 +132,8 @@ def load_all_data():
         "products_df": products_df,
         "warehouses_df": warehouses_df,
         "supplier_product_df": supplier_product_df,
-        "demand_df": demand_df,
-        "inventory_df": inventory_df,
-        "shipments_df": shipments_df,
+        "demand_df": None,
+        "inventory_df": None,
+        "shipments_df": None,
         "inventory_summary_df": inventory_summary_df,
-    }
+    })
