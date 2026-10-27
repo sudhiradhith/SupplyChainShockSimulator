@@ -26,5 +26,5 @@ COPY . .
 # Expose Streamlit (8501) and FastAPI (8000)
 EXPOSE 8501 8000
 
-# Default command launches Streamlit Dashboard
-CMD ["streamlit", "run", "app/main.py", "--server.port=8501", "--server.address=0.0.0.0"]
+# Default command launches Streamlit Dashboard (respects Render's dynamic $PORT)
+CMD ["sh", "-c", "streamlit run app/main.py --server.port=${PORT:-8501} --server.address=0.0.0.0"]
