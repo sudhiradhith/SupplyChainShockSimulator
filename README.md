@@ -1,5 +1,7 @@
 # 🛡️ Supply Chain Resilience & Shock Intelligence Platform
 
+[![Render Live Dashboard](https://img.shields.io/badge/Render-Live%20Dashboard-46E3B7?style=flat&logo=render&logoColor=white)](https://supplychainshocksimulator.onrender.com)
+[![Vercel FastAPI API](https://img.shields.io/badge/Vercel-REST%20API-000000?style=flat&logo=vercel&logoColor=white)](https://supply-chain-shock-simulator.vercel.app/docs)
 [![Python 3.12](https://img.shields.io/badge/python-3.12-blue.svg)](https://www.python.org/)
 [![FastAPI](https://img.shields.io/badge/FastAPI-0.141.1-009688.svg)](https://fastapi.tiangolo.com/)
 [![Streamlit](https://img.shields.io/badge/Streamlit-1.63.0-FF4B4B.svg)](https://streamlit.io/)
@@ -10,6 +12,17 @@
 
 > **An enterprise analytics & operational simulation platform answering:**  
 > *"If a supplier or transit corridor is disrupted, how much revenue is at risk, when do stockouts occur, and what is the optimal mitigation action to maximize net benefit?"*
+
+---
+
+## 🌐 Live Deployments
+
+| Component | Platform | Status | URL |
+| :--- | :--- | :--- | :--- |
+| **Interactive Streamlit Dashboard** | **Render** | ![Live](https://img.shields.io/badge/Live-Online-46E3B7?style=flat-square) | [https://supplychainshocksimulator.onrender.com](https://supplychainshocksimulator.onrender.com) |
+| **FastAPI REST Simulation Engine** | **Vercel** | ![Live](https://img.shields.io/badge/Live-Online-000000?style=flat-square) | [https://supply-chain-shock-simulator.vercel.app](https://supply-chain-shock-simulator.vercel.app) |
+| **Interactive Swagger API Docs** | **Vercel** | ![Swagger](https://img.shields.io/badge/Swagger-Docs-85EA2D?style=flat-square&logo=swagger&logoColor=black) | [https://supply-chain-shock-simulator.vercel.app/docs](https://supply-chain-shock-simulator.vercel.app/docs) |
+| **API Health Check** | **Vercel** | ![Health](https://img.shields.io/badge/Health-200%20OK-10B981?style=flat-square) | [https://supply-chain-shock-simulator.vercel.app/health](https://supply-chain-shock-simulator.vercel.app/health) |
 
 ---
 
