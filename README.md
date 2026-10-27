@@ -101,8 +101,9 @@ cd SupplyChainShockSimulator
 python -m venv .venv
 .venv\Scripts\activate   # Windows (.venv/bin/activate on Linux/Mac)
 
-# Install dependencies
-pip install -r requirements.txt
+# Install dependencies (full dashboard + API + ML stack)
+pip install -r requirements-dashboard.txt
+# (For lightweight API-only deployment on Vercel: pip install -r requirements.txt)
 ```
 
 ### 2. Environment Configuration

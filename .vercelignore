@@ -1,0 +1,15 @@
+# Vercel deployment ignore rules - exclude non-API files to minimize function bundle size
+.git
+.github
+.agent
+app/
+docs/
+notebooks/
+powerbi/
+tests/
+Dockerfile
+docker-compose.yml
+render.yaml
+README.md
+requirements-dashboard.txt
+.env.example
